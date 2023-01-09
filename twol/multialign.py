@@ -9,6 +9,8 @@ This is free software according to GNU GPL 3 license.
 
 """
 
+import re
+
 import hfst_dev as hfst
 
 import grapheme
@@ -104,7 +106,7 @@ Returns a transducer where input labels of thrasitions are concatenations of the
             if not alphabet.mphon_is_valid(new_insym):
                 continue
             new_weight = alphabet.mphon_weight(new_insym)
-            result_arc = hfst.HfstBasicTransition(tostate,
+            result_arc = hfst.HfstTransition(tostate,
                                                   new_insym,
                                                   new_insym,
                                                   new_weight)
@@ -253,6 +255,8 @@ Returns a number to be added to the weight.
     """
     adj = 10 * len(mphon_lst)
     phon_set_lst = [set(mphon)  for mphon in mphon_lst]
+    #word = "".join(w[0] for w in mphon_lst)
+    #word = re.sub(r"[Ø'´ˇ]", "", word)
     if phon_set_lst[-1] <= alphabet.vowel_set | set("Ø"):
         adj -= 20
     for this_set, next_set in zip(phon_set_lst[:-1], phon_set_lst[1:]):
@@ -262,7 +266,8 @@ Returns a number to be added to the weight.
 
 def multialign(word_lst,
                zero="Ø",
-               max_zeros=1, best_count=1):
+               max_zeros=1, best_count=1, 
+               pick_longest=False, min_longest=None):
     """Aligns a list of words according to similarity of their phonemes
 
 word_lst -- a list of words (or morphs) to be aligned
@@ -311,7 +316,19 @@ list of words aligned by inserting zeros in an optimal way.
     
     if cfg.verbosity >= 10:
         print("aligned_results_lst:", aligned_results_lst)
-    return sorted(aligned_results_lst, key = lambda r: r[0])[:best_count]
+    if pick_longest:
+        sort_key = lambda r: (r[0], -max(min_longest, len(r[1][0])) if min_longest is not None else -len(r[1][0]))
+    else:
+        sort_key = lambda r: (r[0], len(r[1][0]))
+    sorted_results = sorted(aligned_results_lst, key = sort_key)
+    #if sorted_results[0][0] == sorted_results[1][0]:
+    #    k = input("{} and {} for the best alternative. Enter something to swap. ".format(sorted_results[0], sorted_results[1]))
+    #    if k != "":
+    #        tmp = sorted_results[0]
+    #        sorted_results[0] = sorted_results[1]
+    #        sorted_results[1] = tmp
+    #        print("Ok, swapped.")
+    return sorted_results[:best_count]
         
 def main():
 
@@ -358,6 +375,13 @@ def main():
         help="number of best results to be printed. Default is 1",
         type=int, default=1)
     arpar.add_argument(
+        "-g", "--longest",
+        help="pick longest alignment in case of ties",
+        action="store_true")
+    arpar.add_argument(
+        "-m", "--min-longest",
+        default=None, type=int)
+    arpar.add_argument(
         "-v", "--verbosity",
         help="Level of diagnostic information to be printed. "
         "Default is 0",
@@ -385,7 +409,9 @@ def main():
         aligned_results_lst = multialign(word_lst,
                                          zero="Ø",
                                          max_zeros=args.extra_zeros,
-                                         best_count=args.number)
+                                         best_count=args.number,
+                                         pick_longest=args.longest,
+                                         min_longest=args.min_longest)
         if cfg.verbosity >= 10:
             print("aligned_results_lst:", aligned_results_lst)
         for aligned_result in aligned_results_lst:

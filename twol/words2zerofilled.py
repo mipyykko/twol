@@ -47,6 +47,12 @@ def main():
         "-x", "--extra-zeros", default=0, type=int,
         help="number of extra zeros to be tried in alighnment")
     argparser.add_argument(
+        "-g", "--longest", action="store_true",
+        help="pick longest alignment in case of ties")
+    argparser.add_argument(
+        "-m", "--min-longest", default=None, type=int,
+        help="minimum length to pick the longest alignment")
+    argparser.add_argument(
         "-v", "--verbosity", default=0, type=int,
         help="level of diagnostic and debugging output")
     args = argparser.parse_args()
@@ -144,7 +150,9 @@ def main():
             aligned_results_lst = \
                 multialign.multialign(morphs,
                                       max_zeros=args.extra_zeros,
-                                      best_count=1)
+                                      best_count=1,
+                                      pick_longest=args.longest,
+				      min_longest=args.min_longest)
             if aligned_results_lst:
                 weight, aligned_morphs_lst = aligned_results_lst[0]
             else:

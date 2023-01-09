@@ -105,7 +105,7 @@ def mphon_is_valid(mphon):
         return False
     else:
         return True
-    
+
 def mphon_weight(mphon):
     """Returns the weight of a morphophoneme
 
@@ -186,7 +186,7 @@ def read_alphabet(file_name):
             if not line:
                 continue
             mat_phon_feat = re.fullmatch(
-                r":?(?P<symbol>(\w|')):? *= *(?P<feats>\w*( *, *\w*)+)",
+                r":?(?P<symbol>(\w|'|`|´|ˇ)):? *= *(?P<feats>\w*( *, *\w*)+)",
                 line)
             if mat_phon_feat:
                 # it defines features of a phoneme
@@ -211,7 +211,7 @@ def read_alphabet(file_name):
                 subset_lst.append((set(l_lst), int(mat_feat_set.group("weight"))))
                 continue
             mat_phon_set = re.fullmatch(
-                r"(?P<weight>[0-9]+) *= *(?P<elements>(\w|')+( +(\w|')+)+)",
+                r"(?P<weight>[0-9]+) *= *(?P<elements>(\w|`|´|ˇ|')+( +(\w|`|´|ˇ|')+)+)",
                 line)
             if mat_phon_set:
                 # it defines a subset of features and its weight

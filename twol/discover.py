@@ -236,11 +236,11 @@ def main():
                                                       posi_contexts.copy(),
                                                       nega_contexts.copy())
         if len(pos_contexts) <= len(neg_contexts) or cfg.verbosity > 0:
-            print_rule(pair_symbol, "=>", pos_contexts)
+            print_rule(pair_symbol, "=>", sorted(pos_contexts))
         else:
-            print_rule(pair_symbol, "/<=", neg_contexts)
+            print_rule(pair_symbol, "/<=", sorted(neg_contexts))
         if args.verbosity >= 5:
-            for lc, rc in posi_contexts:
+            for lc, rc in sorted(posi_contexts):
                 l_str = context_to_output_str(lc)
                 r_str = context_to_output_str(rc)
                 print("!{:>29}<{}>{}".format(l_str, outsym, r_str))
